@@ -65,7 +65,8 @@ webapp/                  Capstone web application
   train.py               Patient-grouped CV, baselines, final model fit
   tagt_core.py           TAGT architecture, data loading, preprocessing
   artifacts/             Trained model, scaler, baseline, metrics.json
-  static/                index.html, style.css, app.js
+  static/                index.html, css/, js/, img/ (offline UI, no libraries)
+  screenshots/           UI in light + dark, desktop + mobile
 docs/capstone_report/    Capstone project report (.docx and .pdf)
 data/                    Preprocessed GSE49454-derived dataset
 src/                     Original research code (models, training, analysis)

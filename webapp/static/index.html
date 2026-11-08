@@ -1,375 +1,360 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAGT Flare Predictor</title>
-  <meta name="description" content="University capstone project: SLE flare prediction with a Temporal Attention Graph Transformer (TAGT). Research prototype, not a medical device.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231c5cab'/%3E%3Cpath d='M9 22 16 10 23 22Z' stroke='%23fff' stroke-width='2.4' fill='none'/%3E%3Cg fill='%23fff'%3E%3Ccircle cx='9' cy='22' r='3'/%3E%3Ccircle cx='16' cy='10' r='3'/%3E%3Ccircle cx='23' cy='22' r='3'/%3E%3C/g%3E%3C/svg%3E">
-  <script>
-    /* Apply a remembered theme before first paint (no flash). */
-    try { var t = localStorage.getItem("tagt-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
-  </script>
-  <link rel="stylesheet" href="/static/style.css">
-  <script type="module" src="/static/app.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TAGT Flare Predictor</title>
+<meta name="description" content="University capstone project (Token Burners, UIT, Karnavati University): predicting SLE flares at the next clinic visit with a Temporal Attention Graph Transformer. Research prototype, not a medical device.">
+<link rel="icon" href="/static/img/mark.svg" type="image/svg+xml">
+<script>
+  // Apply a remembered theme before first paint so there is no flash.
+  try {
+    var saved = localStorage.getItem("tagt.theme");
+    if (saved === "light" || saved === "dark") document.documentElement.setAttribute("data-theme", saved);
+  } catch (e) { /* storage blocked: follow the OS */ }
+</script>
+<link rel="stylesheet" href="/static/css/main.css">
+<script type="module" src="/static/js/main.js"></script>
 </head>
 <body>
-  <a class="skip-link" href="#main" id="skipLink">Skip to content</a>
+<a class="skip" href="#content">Skip to main content</a>
 
-  <header class="site-header">
-    <div class="wrap header-inner">
-      <a class="brand" href="#overview" aria-label="TAGT Flare Predictor, go to Overview">
-        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
-          <rect width="32" height="32" rx="7" class="brand-bg"/>
-          <path d="M9 22 16 10 23 22Z" class="brand-edge"/>
-          <circle cx="9" cy="22" r="3" class="brand-node"/><circle cx="16" cy="10" r="3" class="brand-node"/><circle cx="23" cy="22" r="3" class="brand-node"/>
-        </svg>
-        <span class="brand-text">
-          <span class="brand-name">TAGT Flare Predictor</span>
-          <span class="brand-sub">SLE capstone · Token Burners</span>
-        </span>
-      </a>
-      <nav class="main-nav" aria-label="Main">
-        <ul>
-          <li><a href="#overview" data-nav="overview">Overview</a></li>
-          <li><a href="#predict" data-nav="predict">Predict</a></li>
-          <li><a href="#results" data-nav="results">Results</a></li>
-          <li><a href="#method" data-nav="method">Methodology</a></li>
-          <li><a href="#team" data-nav="team">Team</a></li>
-        </ul>
-      </nav>
-      <button type="button" class="icon-btn" id="themeToggle" aria-label="Switch to dark theme">
-        <svg class="ico ico-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5Z"/></svg>
-        <svg class="ico ico-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
-      </button>
+<header class="topbar">
+  <div class="shell topbar-row">
+    <a class="brand" href="#/overview">
+      <img src="/static/img/mark.svg" alt="" width="34" height="34">
+      <span class="brand-words">
+        <span class="brand-title">TAGT Flare Predictor</span>
+        <span class="brand-tag">SLE capstone · Token Burners</span>
+      </span>
+    </a>
+    <nav class="tabs" aria-label="Sections">
+      <a href="#/overview" data-route="overview">Overview</a>
+      <a href="#/predict" data-route="predict">Predict</a>
+      <a href="#/results" data-route="results">Results</a>
+      <a href="#/methodology" data-route="methodology">Methodology</a>
+      <a href="#/team" data-route="team">Team</a>
+    </nav>
+    <button class="theme-btn" id="themeBtn" type="button" aria-label="Use dark theme">
+      <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7Z"/></svg>
+      <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 1.8v2.6M12 19.6v2.6M1.8 12h2.6M19.6 12h2.6M4.8 4.8l1.8 1.8M17.4 17.4l1.8 1.8M4.8 19.2l1.8-1.8M17.4 6.6l1.8-1.8"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="shell" id="apiDown" role="alert" hidden></div>
+
+<main id="content" tabindex="-1">
+
+<!-- ===================================================================== OVERVIEW -->
+<section class="page shell" data-page="overview" aria-labelledby="t-overview">
+  <div class="intro">
+    <p class="kicker">University capstone · UIT, Karnavati University</p>
+    <h1 id="t-overview" tabindex="-1">Will this lupus patient flare at their next clinic visit?</h1>
+    <p class="lede">TAGT Flare Predictor reads a whole-blood gene-expression profile and two clinical measurements from today's visit, and returns a <strong>flare risk score</strong> for the next one.</p>
+    <div class="intro-actions">
+      <a class="btn btn-primary" href="#/predict">Run a prediction</a>
+      <a class="btn" href="#/results">How well does it work?</a>
     </div>
+  </div>
+
+  <div class="notice" role="note">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 1.8 20.6h20.4Z"/><path d="M12 9.6v5M12 17.4v.2"/></svg>
+    <p><strong>Research prototype trained on a semi-synthetic dataset</strong> (real GSE49454 expression profiles + simulated clinical visits). <strong>Not a medical device.</strong></p>
+  </div>
+
+  <ul class="stats" aria-label="Dataset and headline result">
+    <li class="stat"><span class="stat-k">Patients</span><span class="stat-v" data-k="dataset.n_patients" data-f="int">—</span><span class="stat-s">simulated patient histories</span></li>
+    <li class="stat"><span class="stat-k">Visit pairs</span><span class="stat-v" data-k="dataset.n_samples" data-f="int">—</span><span class="stat-s"><span data-k="dataset.n_flares" data-f="int">—</span> followed by a flare (<span data-k="dataset.flare_rate" data-f="pct">—</span>)</span></li>
+    <li class="stat"><span class="stat-k">Gene probes</span><span class="stat-v" data-k="dataset.n_genes" data-f="int">—</span><span class="stat-s">Illumina whole-blood array</span></li>
+    <li class="stat"><span class="stat-k">TAGT AUC-ROC</span><span class="stat-v" id="statAuc">—</span><span class="stat-s" id="statAucSub">unseen patients</span></li>
+  </ul>
+
+  <div class="cols-2">
+    <article class="panel">
+      <h2>What is an SLE flare?</h2>
+      <p>Systemic lupus erythematosus (SLE, "lupus") is an autoimmune disease: the immune system attacks the body's own skin, joints, kidneys and blood. It moves between calmer spells and <strong>flares</strong>, periods when inflammation and symptoms get clearly worse.</p>
+      <p>Clinicians score disease activity with <strong>SLEDAI-2K</strong>, a checklist of clinical and lab findings where 0 means inactive and higher means more active. An early warning that a flare is likely could bring a check-up forward or prompt a treatment review.</p>
+    </article>
+    <article class="panel">
+      <h2>What this system does</h2>
+      <p>For one visit it takes <span data-k="dataset.n_genes" data-f="int">—</span> gene-expression values from a blood sample, the current SLEDAI-2K score and whether the patient is flaring now. It outputs a <strong>risk score</strong> for a flare at the next visit, plus the probes that moved that score most.</p>
+      <p>A clinical-only logistic regression (SLEDAI-2K + flaring now) runs beside TAGT as a baseline, and the <a href="#/results">Results</a> page compares every model on patients it never saw in training.</p>
+    </article>
+  </div>
+
+  <article class="panel">
+    <h2>How TAGT works, in three steps</h2>
+    <ol class="flow">
+      <li>
+        <span class="flow-n" aria-hidden="true">1</span>
+        <div><h3>Gene encoder</h3>
+        <p><span data-k="dataset.n_genes" data-f="int">—</span> standardised probe values pass through heavy input dropout and a two-layer network that compresses them to a 128-number summary.</p></div>
+      </li>
+      <li>
+        <span class="flow-n" aria-hidden="true">2</span>
+        <div><h3>Projection + attention</h3>
+        <p>A projection layer and 8-head self-attention re-weight that gene summary.</p></div>
+      </li>
+      <li>
+        <span class="flow-n" aria-hidden="true">3</span>
+        <div><h3>Clinical fusion</h3>
+        <p>SLEDAI-2K and flaring-now are encoded, joined to the gene summary, and a small classifier outputs the flare risk score.</p></div>
+      </li>
+    </ol>
+  </article>
+</section>
+
+<!-- ===================================================================== PREDICT -->
+<section class="page shell" data-page="predict" aria-labelledby="t-predict" hidden>
+  <header class="page-head">
+    <h1 id="t-predict" tabindex="-1">Predict</h1>
+    <p class="lede">Score a visit from the dataset, or describe a patient yourself.</p>
   </header>
 
-  <div id="apiBanner" class="wrap api-banner" role="alert" hidden></div>
+  <div class="notice notice-slim" role="note">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 1.8 20.6h20.4Z"/><path d="M12 9.6v5M12 17.4v.2"/></svg>
+    <p><strong>Research prototype trained on a semi-synthetic dataset</strong> (real GSE49454 expression profiles + simulated clinical visits). <strong>Not a medical device.</strong></p>
+  </div>
 
-  <main id="main" tabindex="-1">
-    <!-- ============================== OVERVIEW ============================== -->
-    <section class="view wrap" id="view-overview" data-view="overview" aria-labelledby="h-overview">
-      <div class="hero">
-        <p class="eyebrow">University capstone project · Karnavati University · UIT</p>
-        <h1 id="h-overview" tabindex="-1">Predicting lupus flares at the next clinic visit</h1>
-        <p class="lead">TAGT Flare Predictor estimates how likely a person with systemic lupus erythematosus (SLE) is to have a flare at their next clinic visit. It uses a whole-blood gene-expression profile and two clinical measurements from the current visit.</p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="#predict">Try a prediction</a>
-          <a class="btn" href="#results">See the evaluation</a>
+  <div class="predict-layout">
+    <form class="panel input-panel" id="form" novalidate aria-labelledby="t-input">
+      <h2 id="t-input">Input</h2>
+
+      <div class="mode" role="radiogroup" aria-label="Input mode">
+        <label><input type="radio" name="mode" value="dataset" checked><span>Dataset visit</span></label>
+        <label><input type="radio" name="mode" value="custom"><span>Custom patient</span></label>
+      </div>
+
+      <div id="modeDataset">
+        <div class="fld">
+          <label for="q">Search visits</label>
+          <input id="q" type="search" autocomplete="off" placeholder="PATIENT_12, visit 3, SLEDAI 17…" aria-describedby="qCount">
+        </div>
+        <div class="fld">
+          <label for="visit">Visit</label>
+          <select id="visit" aria-describedby="qCount"><option>Loading…</option></select>
+          <p class="help" id="qCount" aria-live="polite">&nbsp;</p>
+        </div>
+        <div class="idx-row">
+          <div>
+            <label for="idx">Visit index</label>
+            <input id="idx" type="number" min="0" step="1" inputmode="numeric" aria-describedby="idxHelp">
+          </div>
+          <button class="btn" id="randomBtn" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3.5"/><circle cx="8.5" cy="8.5" r="1.3" class="dot"/><circle cx="15.5" cy="15.5" r="1.3" class="dot"/><circle cx="15.5" cy="8.5" r="1.3" class="dot"/><circle cx="8.5" cy="15.5" r="1.3" class="dot"/></svg>
+            Random visit
+          </button>
+        </div>
+        <p class="help" id="idxHelp">Typing an index selects that visit. The true outcome stays hidden until you run a prediction.</p>
+      </div>
+
+      <div id="modeCustom" hidden>
+        <div class="fld">
+          <span class="lbl" id="sledaiLbl">SLEDAI-2K score</span>
+          <div class="sledai">
+            <input id="sledaiRange" type="range" min="0" max="45" step="1" value="10" aria-labelledby="sledaiLbl" aria-describedby="sledaiHelp">
+            <input id="sledai" type="number" min="0" max="105" step="0.1" value="10" inputmode="decimal" aria-labelledby="sledaiLbl" aria-describedby="sledaiHelp">
+          </div>
+          <p class="help" id="sledaiHelp">Slider: 0–45, the usual range. Type any value up to 105.</p>
+        </div>
+        <div class="fld">
+          <label class="toggle">
+            <input id="flaring" type="checkbox" role="switch">
+            <span class="toggle-ui" aria-hidden="true"></span>
+            <span class="toggle-text">Patient is flaring now</span>
+          </label>
+        </div>
+        <div class="fld">
+          <label for="csv">Gene-expression CSV <span class="opt">optional</span></label>
+          <input id="csv" type="file" accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values" aria-describedby="csvHelp csvMsg">
+          <p class="help" id="csvHelp">Columns <code>probe_id,expression</code> (log2), separated by commas, semicolons or tabs. Probes you leave out use the cohort mean. <a href="/api/template.csv" download>Download the template</a>.</p>
+          <div class="csv-line">
+            <p class="help" id="csvMsg" aria-live="polite"></p>
+            <button class="btn btn-sm" id="csvClear" type="button" hidden>Clear file</button>
+          </div>
         </div>
       </div>
 
-      <aside class="disclaimer" role="note" aria-label="Disclaimer">
-        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4.5M12 17.2v.3"/></svg>
-        <p><strong>Research prototype trained on a semi-synthetic dataset</strong> (real GSE49454 expression profiles + simulated clinical visits). <strong>Not a medical device.</strong></p>
-      </aside>
+      <button class="btn btn-primary btn-block btn-go" id="go" type="submit">
+        <span class="spin" aria-hidden="true"></span><span class="go-text">Predict</span>
+      </button>
+      <div class="err" id="err" role="alert" hidden></div>
+    </form>
 
-      <div class="tiles" id="statTiles">
-        <div class="tile"><p class="tile-label">Patients</p><p class="tile-value" data-bind="dataset.n_patients" data-fmt="int">–</p><p class="tile-sub">Simulated patient histories</p></div>
-        <div class="tile"><p class="tile-label">Visit pairs</p><p class="tile-value" data-bind="dataset.n_samples" data-fmt="int">–</p><p class="tile-sub"><span data-bind="dataset.n_flares" data-fmt="int">–</span> followed by a flare (<span data-bind="dataset.flare_rate" data-fmt="pct">–</span>)</p></div>
-        <div class="tile"><p class="tile-label">Gene probes</p><p class="tile-value" data-bind="dataset.n_genes" data-fmt="int">–</p><p class="tile-sub">Illumina whole-blood probes (GSE49454)</p></div>
-        <div class="tile"><p class="tile-label">TAGT AUC-ROC</p><p class="tile-value" id="tileTagtAuc">–</p><p class="tile-sub" id="tileTagtSub">On unseen patients</p></div>
-      </div>
-
-      <div class="grid-2">
-        <article class="card">
-          <h2>What is an SLE flare?</h2>
-          <p>Systemic lupus erythematosus (SLE, or lupus) is a long-term autoimmune disease: the immune system attacks the body's own tissues, such as skin, joints, kidneys and blood cells. It usually alternates between quieter periods and <strong>flares</strong>, when symptoms and inflammation get worse.</p>
-          <p>Doctors track disease activity with the <strong>SLEDAI-2K</strong> score, a checklist of clinical and laboratory findings (0 means inactive; higher means more active). Knowing that a flare is likely could prompt an earlier check-up or a change in treatment.</p>
-        </article>
-        <article class="card">
-          <h2>What this system does</h2>
-          <p>For one clinic visit it takes <span data-bind="dataset.n_genes" data-fmt="int">–</span> gene-expression values from a blood sample, the current SLEDAI-2K score and whether the patient is flaring now. It returns a <strong>flare risk score</strong> for the next visit.</p>
-          <p>A clinical-only logistic regression runs alongside as a baseline. The <a href="#results">Results</a> page compares every model on patients it never saw during training.</p>
-        </article>
-      </div>
-
-      <article class="card">
-        <h2>How the model works</h2>
-        <p class="sub">TAGT (Temporal Attention Graph Transformer) in three steps.</p>
-        <ol class="pipeline">
-          <li class="step">
-            <span class="step-input">Input: <span data-bind="dataset.n_genes" data-fmt="int">–</span> probe values</span>
-            <span class="step-num" aria-hidden="true">1</span>
-            <h3>Gene encoder</h3>
-            <p>Each probe is standardised, then heavy input dropout (70% during training) and a two-layer network compress the profile into 128 numbers.</p>
-          </li>
-          <li class="step">
-            <span class="step-input step-input-ghost" aria-hidden="true">&nbsp;</span>
-            <span class="step-num" aria-hidden="true">2</span>
-            <h3>Projection + attention</h3>
-            <p>A projection layer and 8-head self-attention re-weight that 128-number gene summary.</p>
-          </li>
-          <li class="step">
-            <span class="step-input">Input: SLEDAI-2K + flaring now</span>
-            <span class="step-num" aria-hidden="true">3</span>
-            <h3>Clinical fusion</h3>
-            <p>The two clinical inputs are encoded and joined with the gene summary. A small classifier outputs the <strong>flare risk score</strong>.</p>
-          </li>
-        </ol>
+    <div class="out">
+      <article class="panel result" id="result" aria-labelledby="t-result" aria-live="polite">
+        <h2 id="t-result">Result</h2>
+        <div id="resultBody">
+          <div class="empty">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 20.5h17M6 17V11M10.5 17V7M15 17v-4M19.5 17V4.5"/></svg>
+            <p>No prediction yet. Choose an input and press <strong>Predict</strong>.</p>
+          </div>
+        </div>
       </article>
-    </section>
 
-    <!-- ============================== PREDICT ============================== -->
-    <section class="view wrap" id="view-predict" data-view="predict" aria-labelledby="h-predict" hidden>
-      <header class="view-head">
-        <h1 id="h-predict" tabindex="-1">Predict a flare</h1>
-        <p class="lead">Pick a visit from the dataset, or describe a custom patient.</p>
-      </header>
-
-      <aside class="disclaimer compact" role="note" aria-label="Disclaimer">
-        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4.5M12 17.2v.3"/></svg>
-        <p><strong>Research prototype trained on a semi-synthetic dataset</strong> (real GSE49454 expression profiles + simulated clinical visits). <strong>Not a medical device.</strong></p>
-      </aside>
-
-      <div class="predict-grid">
-        <form class="card form-card" id="predictForm" novalidate aria-labelledby="h-input">
-          <h2 id="h-input">Input</h2>
-
-          <fieldset class="seg">
-            <legend class="sr-only">Input mode</legend>
-            <input type="radio" name="mode" id="modeDataset" value="dataset" checked>
-            <label for="modeDataset">Dataset visit</label>
-            <input type="radio" name="mode" id="modeCustom" value="custom">
-            <label for="modeCustom">Custom patient</label>
-          </fieldset>
-
-          <div id="paneDataset" class="pane">
-            <div class="field">
-              <label for="visitSearch">Find a visit</label>
-              <input type="search" id="visitSearch" placeholder="e.g. PATIENT_12 or SLEDAI 17" autocomplete="off" aria-describedby="visitCount">
-            </div>
-            <div class="field">
-              <label for="visitSelect">Visit</label>
-              <select id="visitSelect" aria-describedby="visitCount"><option>Loading visits…</option></select>
-              <p class="hint" id="visitCount" aria-live="polite">&nbsp;</p>
-            </div>
-            <div class="field field-inline">
-              <div>
-                <label for="visitIndex">Visit index</label>
-                <input type="number" id="visitIndex" inputmode="numeric" min="0" step="1" aria-describedby="visitIndexHint">
-              </div>
-              <button type="button" class="btn" id="randomBtn">
-                <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h3.5c3 0 4 2 5.5 5s2.5 5 5.5 5H21M18 14l3 3-3 3M3 17h3.5c1.4 0 2.4-.5 3.2-1.3M14.3 8.3c.8-.8 1.8-1.3 3.2-1.3H21M18 4l3 3-3 3"/></svg>
-                Random visit
-              </button>
-            </div>
-            <p class="hint" id="visitIndexHint">Typing an index selects that visit. The true outcome stays hidden until you run a prediction.</p>
-          </div>
-
-          <div id="paneCustom" class="pane" hidden>
-            <div class="field">
-              <label for="sledaiRange" id="sledaiLabel">SLEDAI-2K score</label>
-              <div class="slider-row">
-                <input type="range" id="sledaiRange" min="0" max="45" step="1" value="10" aria-describedby="sledaiHint">
-                <input type="number" id="sledaiNum" min="0" max="105" step="0.1" value="10" aria-labelledby="sledaiLabel" aria-describedby="sledaiHint">
-              </div>
-              <p class="hint" id="sledaiHint">Slider covers 0–45 (the typical range). Type a value up to 105.</p>
-            </div>
-            <div class="field">
-              <label class="switch" for="flareNow">
-                <input type="checkbox" id="flareNow" role="switch">
-                <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
-                <span>Patient is flaring now</span>
-              </label>
-            </div>
-            <div class="field">
-              <label for="csvFile">Gene-expression CSV <span class="optional">(optional)</span></label>
-              <input type="file" id="csvFile" accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values" aria-describedby="csvHint csvStatus">
-              <p class="hint" id="csvHint">Two columns, <code>probe_id,expression</code> (log2 values), separated by commas, semicolons or tabs. Missing probes use the cohort mean. <a href="/api/template.csv" download="expression_template.csv">Download the template</a> (1,000 probes at cohort-mean values).</p>
-              <div class="csv-status-row">
-                <p class="hint status" id="csvStatus" aria-live="polite"></p>
-                <button type="button" class="btn btn-small" id="csvClear" hidden>Remove file</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-actions">
-            <button type="submit" class="btn btn-primary btn-wide" id="predictBtn">
-              <span class="spinner" aria-hidden="true"></span><span class="btn-label">Predict</span>
-            </button>
-          </div>
-          <div class="form-error" id="formError" role="alert" hidden></div>
-        </form>
-
-        <article class="card result-card" id="resultCard" aria-labelledby="h-result">
-          <h2 id="h-result">Result</h2>
-          <div id="resultBody" class="result-body">
-            <div class="placeholder">
-              <svg class="ico ico-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 5-6"/></svg>
-              <p>No prediction yet.</p>
-              <p class="hint">Choose a dataset visit or a custom patient, then press <strong>Predict</strong>.</p>
-            </div>
-          </div>
-        </article>
-      </div>
-
-      <article class="card explain-card" aria-labelledby="h-explain">
-        <h2 id="h-explain">Which probes moved the TAGT score?</h2>
-        <p class="note-inline">
-          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.3"/></svg>
-          <span>These are <strong>model sensitivities, not biology.</strong> Each bar is gradient × input on the standardised expression value: how much that probe pushed this one TAGT score up or down. They do not show that a gene causes, or is biologically linked to, flares, and the dataset's expression was assigned to visits at random.</span>
+      <article class="panel explain" aria-labelledby="t-explain">
+        <h2 id="t-explain">Which probes moved the TAGT score</h2>
+        <p class="caveat">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.2"/><path d="M12 10.8v6M12 7.4v.2"/></svg>
+          <span><strong>Model sensitivities, not biology.</strong> Each bar is gradient × input on the standardised expression value: how far that probe pushed this one score up or down. It does not show that a gene causes flares or is biologically linked to them.</span>
         </p>
-        <div id="explainBody" class="explain-body">
-          <div class="placeholder">
-            <p>Run a prediction to see the 10 probes that most moved the TAGT score.</p>
-          </div>
+        <div id="explainBody">
+          <div class="empty"><p>The 10 most influential probes appear here after a prediction.</p></div>
         </div>
       </article>
-      <p class="sr-only" id="liveStatus" aria-live="polite"></p>
-    </section>
-
-    <!-- ============================== RESULTS ============================== -->
-    <section class="view wrap" id="view-results" data-view="results" aria-labelledby="h-results" hidden>
-      <header class="view-head">
-        <h1 id="h-results" tabindex="-1">Results</h1>
-        <p class="lead" id="resultsMeta">Loading evaluation…</p>
-      </header>
-
-      <aside class="card findings" aria-labelledby="h-findings">
-        <h2 id="h-findings">Key findings</h2>
-        <ul id="findings"><li>Loading…</li></ul>
-      </aside>
-
-      <div class="grid-2">
-        <article class="card chart-card" aria-labelledby="h-roc">
-          <h2 id="h-roc">ROC curves (unseen patients)</h2>
-          <p class="sub">Out-of-fold predictions pooled across the 5 folds. Hover, or focus the chart and use the arrow keys, to read the true-positive rate at any false-positive rate.</p>
-          <ul class="legend" id="rocLegend"></ul>
-          <div id="rocChart" class="chart"></div>
-          <details>
-            <summary>Show as table</summary>
-            <div class="table-wrap" id="rocTable"></div>
-          </details>
-        </article>
-        <article class="card chart-card" aria-labelledby="h-auc">
-          <h2 id="h-auc">AUC-ROC by model</h2>
-          <p class="sub">Bar: pooled out-of-fold AUC. Dot and whisker: mean ± SD of the five fold AUCs. Vertical line: chance (0.5).</p>
-          <div id="aucChart" class="chart"></div>
-          <details>
-            <summary>Per-fold AUCs</summary>
-            <div class="table-wrap" id="foldTable"></div>
-          </details>
-        </article>
-      </div>
-
-      <article class="card" aria-labelledby="h-metrics">
-        <h2 id="h-metrics">All metrics</h2>
-        <p class="sub">Sorted by AUC. Accuracy, sensitivity, specificity and F1 use each model's own decision threshold (Youden's J on its out-of-fold scores).</p>
-        <div class="table-wrap" id="metricsTable"></div>
-      </article>
-
-      <div class="grid-2" id="confusionGrid"></div>
-    </section>
-
-    <!-- ============================== METHODOLOGY ============================== -->
-    <section class="view wrap" id="view-method" data-view="method" aria-labelledby="h-method" hidden>
-      <header class="view-head">
-        <h1 id="h-method" tabindex="-1">Methodology</h1>
-        <p class="lead">How the data was built, how TAGT was trained and evaluated, and what this evaluation can and cannot show.</p>
-      </header>
-
-      <div class="method-grid">
-        <article class="card">
-          <h2>Dataset provenance</h2>
-          <p><strong>Semi-synthetic.</strong> The gene-expression profiles are real whole-blood microarray data from GEO series <strong>GSE49454</strong> (Illumina). The patients, their visit sequences, SLEDAI-2K scores and flare labels were <strong>simulated</strong> by <code>src/data/process_real_data.py</code>, and each simulated visit was given a randomly chosen real profile plus noise.</p>
-          <ul class="facts">
-            <li><span>Visit pairs (current → next visit)</span><strong data-bind="dataset.n_samples" data-fmt="int">–</strong></li>
-            <li><span>Simulated patients</span><strong data-bind="dataset.n_patients" data-fmt="int">–</strong></li>
-            <li><span>Gene probes</span><strong data-bind="dataset.n_genes" data-fmt="int">–</strong></li>
-            <li><span>Next-visit flares</span><strong><span data-bind="dataset.n_flares" data-fmt="int">–</span> (<span data-bind="dataset.flare_rate" data-fmt="pct">–</span>)</strong></li>
-          </ul>
-          <p class="hint">Because expression was assigned to visits at random, it carries little genuine link to the outcome. Gene-based models can only find weak or spurious signal here.</p>
-        </article>
-
-        <article class="card">
-          <h2>Inputs and target</h2>
-          <ul class="plain">
-            <li><strong>Gene expression:</strong> <span data-bind="dataset.n_genes" data-fmt="int">–</span> log2 probe values, standardised per probe with the training fold's mean and SD.</li>
-            <li><strong>SLEDAI-2K</strong> at the current visit (divided by 20).</li>
-            <li><strong>Flaring now</strong> (0 or 1).</li>
-            <li><strong>Target:</strong> whether the patient flares at the <em>next</em> visit.</li>
-          </ul>
-        </article>
-
-        <article class="card">
-          <h2>Model</h2>
-          <ul class="plain">
-            <li><strong>Gene encoder:</strong> input dropout 0.7 → 1,000→256 → ReLU → dropout 0.3 → 256→128.</li>
-            <li><strong>Projection + attention:</strong> 128→128 projection with ReLU, then 8-head self-attention (128-d).</li>
-            <li><strong>Clinical encoder:</strong> 2→32 with ReLU.</li>
-            <li><strong>Classifier:</strong> 160→128→64→1 with dropout 0.3; a sigmoid gives the risk score.</li>
-          </ul>
-          <p class="hint">In this compact deployed variant, the "graph" step is a dense projection (no gene–gene interaction network is applied), and attention runs over a single visit, so it does not model multi-visit sequences.</p>
-        </article>
-
-        <article class="card">
-          <h2>Training</h2>
-          <ul class="plain">
-            <li>Optimiser <strong>AdamW</strong>, learning rate <strong>1e-3</strong>, weight decay <strong>0.05</strong>.</li>
-            <li><strong>15 epochs</strong>, batch size <strong>32</strong>, gradient clipping at 1.0.</li>
-            <li>Input dropout <strong>0.7</strong> on the gene branch, plus Gaussian noise (σ = 0.1) on standardised expression.</li>
-            <li>Class-balanced binary cross-entropy (positive weight = non-flares ÷ flares).</li>
-          </ul>
-          <p class="hint">Cross-validation plus the final fit took <span data-bind="training_seconds" data-fmt="sec">–</span> on CPU (trained <span data-bind="trained_at">–</span>).</p>
-        </article>
-
-        <article class="card">
-          <h2>Validation</h2>
-          <p><strong data-bind="protocol">–</strong>. All visits from one patient stay in the same fold, so every score is measured on patients the model never saw.</p>
-          <ul class="plain">
-            <li>AUC-ROC is computed on the pooled out-of-fold predictions; fold AUCs are reported as mean ± SD.</li>
-            <li>Decision thresholds maximise Youden's J on those same out-of-fold scores, so accuracy, sensitivity and specificity are slightly optimistic.</li>
-            <li>The deployed models are then refit on all visits, so predictions for <em>dataset</em> visits on the Predict page are in-sample.</li>
-          </ul>
-        </article>
-
-        <article class="card">
-          <h2>Baselines</h2>
-          <ul class="plain">
-            <li><strong>Logistic regression (clinical):</strong> SLEDAI-2K and flaring now only, standardised.</li>
-            <li><strong>Logistic regression (genes + clinical):</strong> all 1,002 inputs, strong L2 penalty (C = 0.01).</li>
-            <li><strong>Random forest (genes + clinical):</strong> 300 trees, minimum 3 samples per leaf.</li>
-          </ul>
-          <p class="hint">Gene attributions on the Predict page are gradient × input on the standardised expression for the deployed TAGT model, top 10 by absolute value.</p>
-        </article>
-      </div>
-
-      <article class="card limits" aria-labelledby="h-limits">
-        <h2 id="h-limits">Limitations</h2>
-        <ul class="plain">
-          <li><strong>Semi-synthetic data.</strong> Clinical trajectories and labels are simulated, so no result here is evidence of clinical performance.</li>
-          <li><strong>Small cohort.</strong> <span data-bind="dataset.n_patients" data-fmt="int">–</span> patients, so each test fold holds only about <span data-bind="dataset.n_patients" data-fmt="fold">–</span> of them, and fold AUCs vary widely.</li>
-          <li><strong>Scores are not calibrated probabilities.</strong> Read them as a ranking of risk, not as "the chance of a flare".</li>
-          <li><strong>No external validation.</strong> The models have not been tested on an independent cohort.</li>
-          <li><strong>The earlier 0.943 AUC claim does not hold.</strong> Documents elsewhere in this repository report AUC 0.943. That pipeline fed the model the change in SLEDAI-2K from the current to the <em>next</em> visit (<code>next_sledai − current_sledai</code>), which is information from the future visit, and it did not keep each patient's visits in one fold. Without that leak, under patient-grouped cross-validation, the figure does not reproduce. The numbers on the Results page replace it.</li>
-        </ul>
-      </article>
-    </section>
-
-    <!-- ============================== TEAM ============================== -->
-    <section class="view wrap" id="view-team" data-view="team" aria-labelledby="h-team" hidden>
-      <header class="view-head">
-        <h1 id="h-team" tabindex="-1">Team</h1>
-        <p class="lead"><span id="projectTitle">SLE flare prediction with TAGT</span>: a <span id="projectType">university capstone project</span> by group <strong>Token Burners</strong>.</p>
-      </header>
-      <ul class="team-grid" id="teamGrid"></ul>
-      <article class="card institution" aria-labelledby="h-inst">
-        <div class="logos" id="logos"></div>
-        <div>
-          <h2 id="h-inst">Unitedworld Institute of Technology (UIT)</h2>
-          <p>Karnavati University</p>
-        </div>
-      </article>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <div class="wrap footer-inner">
-      <p>Karnavati University · UIT · Token Burners</p>
-      <p class="hint">Research prototype. Not a medical device.</p>
     </div>
-  </footer>
+  </div>
+</section>
+
+<!-- ===================================================================== RESULTS -->
+<section class="page shell" data-page="results" aria-labelledby="t-results" hidden>
+  <header class="page-head">
+    <h1 id="t-results" tabindex="-1">Results</h1>
+    <p class="lede" id="resultsLede">Loading the evaluation…</p>
+  </header>
+
+  <aside class="panel findings" aria-labelledby="t-findings">
+    <h2 id="t-findings">Key findings</h2>
+    <ul id="findings"><li>Loading…</li></ul>
+  </aside>
+
+  <div class="cols-2">
+    <article class="panel" aria-labelledby="t-roc">
+      <h2 id="t-roc">ROC curves</h2>
+      <p class="sub">Pooled out-of-fold predictions on unseen patients. Hover the plot, or focus it and use ← →, to read each model's true-positive rate.</p>
+      <ul class="key" id="rocKey"></ul>
+      <div class="chart" id="roc"></div>
+      <details><summary>ROC as a table</summary><div class="scroll-x" id="rocTable"></div></details>
+    </article>
+    <article class="panel" aria-labelledby="t-auc">
+      <h2 id="t-auc">AUC-ROC by model</h2>
+      <p class="sub">Bar: pooled out-of-fold AUC. Dot and whisker: mean ± SD of the fold AUCs. Dashed line: chance (0.5).</p>
+      <div class="chart" id="auc"></div>
+      <details><summary>Fold AUCs as a table</summary><div class="scroll-x" id="foldTable"></div></details>
+    </article>
+  </div>
+
+  <article class="panel" aria-labelledby="t-table">
+    <h2 id="t-table">All metrics</h2>
+    <p class="sub">Sorted by AUC-ROC. Accuracy, sensitivity, specificity and F1 are at each model's own threshold (Youden's J on its out-of-fold scores).</p>
+    <div class="scroll-x" id="metrics"></div>
+  </article>
+
+  <div class="cols-2" id="cms"></div>
+</section>
+
+<!-- ===================================================================== METHODOLOGY -->
+<section class="page shell" data-page="methodology" aria-labelledby="t-method" hidden>
+  <header class="page-head">
+    <h1 id="t-method" tabindex="-1">Methodology</h1>
+    <p class="lede">Where the data comes from, how the models were trained and validated, and what the evaluation cannot tell you.</p>
+  </header>
+
+  <div class="cols-2">
+    <article class="panel">
+      <h2>Dataset provenance</h2>
+      <p><strong>Semi-synthetic.</strong> The expression profiles are real whole-blood microarray data from GEO series <strong>GSE49454</strong> (Illumina). The patients, their visit sequences, SLEDAI-2K scores and flare labels are <strong>simulated</strong> (<code>src/data/process_real_data.py</code>); each simulated visit was given a randomly drawn real profile plus noise.</p>
+      <dl class="facts">
+        <div><dt>Visit pairs (this visit → next)</dt><dd data-k="dataset.n_samples" data-f="int">—</dd></div>
+        <div><dt>Simulated patients</dt><dd data-k="dataset.n_patients" data-f="int">—</dd></div>
+        <div><dt>Gene probes</dt><dd data-k="dataset.n_genes" data-f="int">—</dd></div>
+        <div><dt>Next-visit flares</dt><dd><span data-k="dataset.n_flares" data-f="int">—</span> (<span data-k="dataset.flare_rate" data-f="pct">—</span>)</dd></div>
+      </dl>
+      <p class="help">Because profiles were attached to visits at random, expression carries little real link to the outcome; gene-based models can only find weak or spurious signal.</p>
+    </article>
+
+    <article class="panel">
+      <h2>Inputs and target</h2>
+      <ul class="list">
+        <li><strong>Gene expression:</strong> <span data-k="dataset.n_genes" data-f="int">—</span> log2 probe values, standardised per probe with the training fold's mean and SD.</li>
+        <li><strong>SLEDAI-2K</strong> at the current visit (scaled by 1/20).</li>
+        <li><strong>Flaring now:</strong> 0 or 1.</li>
+        <li><strong>Target:</strong> a flare at the <em>next</em> visit.</li>
+      </ul>
+      <h3>Architecture (deployed variant)</h3>
+      <ul class="list">
+        <li>Gene encoder: input dropout 0.7 → 1,000→256, ReLU, dropout 0.3 → 256→128.</li>
+        <li>Projection 128→128 with ReLU, then 8-head self-attention.</li>
+        <li>Clinical encoder 2→32; classifier 160→128→64→1 with dropout 0.3.</li>
+      </ul>
+      <p class="help">Here the "graph" step is a dense projection, not a gene–gene network, and attention sees one visit at a time, not a sequence of visits.</p>
+    </article>
+
+    <article class="panel">
+      <h2>Training</h2>
+      <ul class="list">
+        <li>Optimiser <strong>AdamW</strong>, learning rate <strong>1e-3</strong>, weight decay <strong>0.05</strong>.</li>
+        <li><strong>15 epochs</strong>, batch size <strong>32</strong>, gradient clipping at 1.0.</li>
+        <li>Input dropout <strong>0.7</strong> on the gene branch, plus Gaussian noise (σ 0.1) on the standardised expression.</li>
+        <li>Class-weighted binary cross-entropy (positive weight = non-flares ÷ flares).</li>
+      </ul>
+      <p class="help">The full cross-validation plus final fit took <span data-k="training_seconds" data-f="sec">—</span> on CPU; last trained <span data-k="trained_at">—</span>.</p>
+    </article>
+
+    <article class="panel">
+      <h2>Validation</h2>
+      <p><strong data-k="protocol">—</strong>.</p>
+      <ul class="list">
+        <li>All visits from one patient stay in one fold, so every reported score comes from patients the model never saw.</li>
+        <li>AUC-ROC is computed on the pooled out-of-fold scores; fold AUCs are reported as mean ± SD.</li>
+        <li>Thresholds maximise Youden's J on those same out-of-fold scores, so accuracy, sensitivity and specificity are slightly optimistic.</li>
+        <li>The served models are then refit on every visit, so dataset-visit predictions on the Predict page are in-sample.</li>
+      </ul>
+    </article>
+
+    <article class="panel">
+      <h2>Baselines</h2>
+      <ul class="list">
+        <li><strong>Logistic regression (clinical):</strong> SLEDAI-2K and flaring now only, standardised.</li>
+        <li><strong>Logistic regression (genes + clinical):</strong> all 1,002 inputs, strong L2 penalty (C = 0.01).</li>
+        <li><strong>Random forest (genes + clinical):</strong> 300 trees, at least 3 samples per leaf.</li>
+      </ul>
+      <p class="help">Every model is trained and scored on the same folds.</p>
+    </article>
+
+    <article class="panel">
+      <h2>About the earlier 0.943 AUC</h2>
+      <p>Older documents in this repository report an AUC of 0.943. That pipeline fed the model the change in SLEDAI-2K from the current visit to the <em>next</em> one (<code>next_sledai − current_sledai</code> in <code>src/training/train_breakthrough_v2.py</code>), which is information from the visit being predicted, and it did not keep each patient's visits in a single fold.</p>
+      <p>With that leaked feature removed and patient-grouped cross-validation, the result <strong>does not reproduce</strong>. The figures on the Results page replace it.</p>
+    </article>
+  </div>
+
+  <article class="panel limits" aria-labelledby="t-limits">
+    <h2 id="t-limits">Limitations</h2>
+    <ul class="list">
+      <li><strong>Semi-synthetic data.</strong> Visits and labels are simulated; nothing here is evidence of clinical performance.</li>
+      <li><strong>Small cohort.</strong> <span data-k="dataset.n_patients" data-f="int">—</span> patients, so each test fold holds about <span data-k="dataset.n_patients" data-f="fold">—</span> and fold AUCs swing widely.</li>
+      <li><strong>Uncalibrated scores.</strong> A risk score ranks visits; it is not "the chance of a flare".</li>
+      <li><strong>No external validation</strong> on an independent cohort.</li>
+      <li><strong>Attributions are local sensitivities</strong> of one model, not biological findings.</li>
+    </ul>
+  </article>
+</section>
+
+<!-- ===================================================================== TEAM -->
+<section class="page shell" data-page="team" aria-labelledby="t-team" hidden>
+  <header class="page-head">
+    <h1 id="t-team" tabindex="-1">Team</h1>
+    <p class="lede"><span id="projTitle">TAGT · SLE Flare Prediction</span>: a <span id="projType">university capstone project</span> by group <strong>Token Burners</strong>.</p>
+  </header>
+  <ul class="people" id="people"></ul>
+  <article class="panel inst" aria-labelledby="t-inst">
+    <div class="inst-logos" id="logos"></div>
+    <div>
+      <h2 id="t-inst">Unitedworld Institute of Technology (UIT)</h2>
+      <p>Karnavati University</p>
+    </div>
+  </article>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="shell footer-row">
+    <p>Karnavati University · UIT · Token Burners</p>
+    <p class="help">Research prototype · not a medical device</p>
+  </div>
+</footer>
 </body>
 </html>

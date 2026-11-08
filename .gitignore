@@ -87,7 +87,8 @@ results/temp/
 # --- Capstone web app ---
 # Keep the trained web-app model (overrides the *.pt rule above)
 !webapp/artifacts/*.pt
-# Machine-specific virtual environment copied from another PC
+# Machine-specific virtual environments copied from other PCs
 venv_gpu/
+venv_cuda/
 # Office lock files
 ~$*

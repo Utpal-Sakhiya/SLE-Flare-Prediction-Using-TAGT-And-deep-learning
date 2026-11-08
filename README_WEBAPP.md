@@ -51,13 +51,14 @@ Plain HTML, CSS and JavaScript in `webapp/static/`, with no build step, no libra
 | File | Role |
 |---|---|
 | `index.html` | Page shell: header, 5 sections, footer |
-| `style.css` | Light/dark theme tokens (OS setting + manual toggle stored in `localStorage`), layout from 360 px to 1440 px |
-| `app.js` | Routing (`#overview`, `#predict`, ...), API calls, CSV parsing, rendering. Every number comes from `/api/info`, `/api/samples` or `/api/predict` |
-| `charts.js` | Hand-written SVG charts: ROC with crosshair readout, AUC bars, diverging attribution bars. Tooltips work on hover and keyboard focus; each chart has a table alternative |
+| `css/main.css` | Light/dark theme tokens (OS setting + manual toggle stored in `localStorage`), layout from 360 px to 1440 px, space reserved for results so nothing shifts |
+| `js/main.js` | Routing (`#/overview`, `#/predict`, ...), API calls, CSV parsing, rendering, generated key findings. Every number comes from `/api/info`, `/api/samples` or `/api/predict` |
+| `js/charts.js` | Hand-written SVG charts: ROC with crosshair readout, AUC bars with fold ± SD whiskers, diverging attribution bars. Tooltips work on hover and keyboard focus; each chart has a table alternative |
+| `img/mark.svg` | Logo and favicon |
 
 **Run it:** start the server (see *Quick start* above), then open <http://127.0.0.1:5000>. Nothing else is needed.
 
-**Institution logos:** the logo files were not available when the UI was built. Copy them into `webapp/static/img/` and uncomment the two `LOGOS` entries at the top of `webapp/static/app.js`. They will appear on the Team page.
+**Institution logos:** the logo files were not available when the UI was built. Copy them into `webapp/static/img/` and list them in `LOGOS` at the top of `webapp/static/js/main.js`, e.g. `{ src: "/static/img/ku-logo.jpeg", alt: "Karnavati University logo" }`. They will appear on the Team page.
 
 **Screenshots** of every section in light and dark mode, at 1440 px and 390 px, are in `webapp/screenshots/`.
 
@@ -75,7 +76,7 @@ webapp/
 ├── train.py          Patient-grouped 5-fold CV, baselines, final model fit
 ├── tagt_core.py      TAGT architecture, data loading, preprocessing
 ├── artifacts/        Trained weights, scaler, baseline model, metrics.json (generated)
-├── static/           index.html, style.css, app.js, charts.js (UI, no external libraries)
+├── static/           index.html, css/main.css, js/main.js, js/charts.js, img/ (UI, no external libraries)
 └── screenshots/      UI screenshots, light + dark, desktop + mobile
 run_webapp.bat        One-click launcher
 requirements-webapp.txt

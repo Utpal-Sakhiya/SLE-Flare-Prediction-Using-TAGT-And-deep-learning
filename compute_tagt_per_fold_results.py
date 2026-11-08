@@ -71,7 +71,7 @@ except ImportError:
             # Get probabilities
             probabilities = self.classifier(combined).squeeze()
             
-                        logits = torch.log(probabilities / (1 - probabilities + 1e-8))
+            logits = torch.log(probabilities / (1 - probabilities + 1e-8))
             
             return {
                 'probabilities': probabilities,
@@ -100,7 +100,7 @@ class OptimizedSLEDataset(Dataset):
         expression = np.array(sequence['expression'], dtype=np.float32)
         current_sledai = float(sequence['current_sledai'])
         
-                gene_expression = torch.FloatTensor(expression).unsqueeze(0)  # [1, n_genes]
+        gene_expression = torch.FloatTensor(expression).unsqueeze(0)  # [1, n_genes]
         
         # Enhanced clinical features
         clinical_features = [
@@ -144,7 +144,7 @@ def load_data():
             adjacency_sparse = sp.load_npz('data/processed/adjacency_real.npz')
             adjacency = adjacency_sparse.toarray().astype(np.float32)
         except FileNotFoundError:
-                        n_genes = len(sequences[0]['expression'])
+            n_genes = len(sequences[0]['expression'])
             adjacency = np.eye(n_genes, dtype=np.float32)
             print(f"Warning: Using identity adjacency matrix ({n_genes}x{n_genes})")
         
@@ -254,7 +254,7 @@ def main():
     print("=" * 80)
     print(f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
-        os.makedirs("results/per_fold", exist_ok=True)
+    os.makedirs("results/per_fold", exist_ok=True)
     
     # Load configuration
     config = load_config()
@@ -295,7 +295,7 @@ def main():
         print(f"FOLD {fold_idx + 1}/{n_splits}")
         print("=" * 50)
         
-                train_dataset = torch.utils.data.Subset(full_dataset, train_idx)
+        train_dataset = torch.utils.data.Subset(full_dataset, train_idx)
         test_dataset = torch.utils.data.Subset(full_dataset, test_idx)
         
         train_loader = DataLoader(
@@ -316,7 +316,7 @@ def main():
         
         print(f"Train samples: {len(train_dataset)}, Test samples: {len(test_dataset)}")
         
-                model = create_optimized_model(config)
+        model = create_optimized_model(config)
         model.to(device)
         
         optimizer = optim.AdamW(
